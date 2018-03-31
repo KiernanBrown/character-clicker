@@ -28,7 +28,9 @@ const DomoForm = (props) => {
       <input id="domoName" type="text" name="name" placeholder="Domo Name"/>
       <label htmlFor="age">Age: </label>
       <input id="domoAge" type="text" name="age" placeholder="Domo Age"/>
-      <input type="hidden" name="_csrf" value={props.csrf} />
+      <label htmlFor="food">Favorite Food: </label>
+      <input id="domoFood" type="text" name="food" placeholder="Favorite Food"/>
+      <input id="csrfToken" type="hidden" name="_csrf" value={props.csrf} />
       <input className = "makeDomoSubmit" type="submit" value="Make Domo" />
     </form>
   );
@@ -44,11 +46,20 @@ const DomoList = function(props) {
   }
   
   const domoNodes = props.domos.map(function(domo) {
+    const deleteDomo = () => {
+      const csrfToken = document.querySelector("#csrfToken").value;
+      sendAjax('POST', '/deleteDomo', `id=${domo._id}&_csrf=${csrfToken}`, function() {
+        loadDomosFromServer()
+      });
+    };
+    
     return (
       <div key={domo._id} className="domo">
         <img src="/assets/img/domoface.jpeg" alt="domo face" className="domoFace" />
         <h3 className="domoName"> Name: {domo.name} </h3>
         <h3 className="domoAge"> Age: {domo.age} </h3>
+        <h3 className="domoFood"> Favorite Food: {domo.food} </h3>
+        <input className="makeDomoSubmit" type="submit" id='deleteButton' onClick={deleteDomo} value="Delete Domo" />
       </div>
     );
   });
@@ -60,10 +71,10 @@ const DomoList = function(props) {
   );
 };
 
-const loadDomosFromServer = () => {
+const loadDomosFromServer = (csrf) => {
   sendAjax('GET', '/getDomos', null, (data) => {
     ReactDOM.render(
-      <DomoList domos={data.domos} />, document.querySelector("#domos")
+      <DomoList csrf={csrf} domos={data.domos} />, document.querySelector("#domos")
     );
   });
 };
@@ -74,10 +85,10 @@ const setup = function(csrf) {
   );
   
   ReactDOM.render(
-    <DomoList domos={[]} />, document.querySelector("#domos")
+    <DomoList csrf={csrf} domos={[]} />, document.querySelector("#domos")
   );
   
-  loadDomosFromServer();
+  loadDomosFromServer(csrf);
 };
 
 const getToken = () => {
