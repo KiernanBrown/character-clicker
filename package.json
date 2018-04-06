@@ -1,11 +1,11 @@
 {
-  "name": "Logins",
+  "name": "project2",
   "version": "1.0.0",
   "engines": {
     "node": "7.5.0",
     "npm": "4.0.5"
   },
-  "description": "A Simple Login Example using Node.js, Mongo and Redis",
+  "description": "Project 2 for Rich Media 2",
   "main": "./server/app.js",
   "scripts": {
     "buildLoginBundle": "babel ./client/login ./client/helper --presets react --out-file ./hosted/loginBundle.js",
@@ -24,7 +24,7 @@
     "Redis",
     "Login"
   ],
-  "author": "Cody Van De Mark",
+  "author": "Kiernan Brown",
   "license": "Apache 2.0",
   "dependencies": {
     "body-parser": "^1.15.0",
@@ -47,6 +47,7 @@
     "eslint": "^3.0.0",
     "eslint-config-airbnb": "^9.0.1",
     "eslint-plugin-import": "^1.10.1",
+    "materialize-css": "^1.0.0-beta",
     "nodemon": "^1.11.0"
   }
 }
