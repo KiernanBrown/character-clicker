@@ -1,4 +1,5 @@
 const models = require('../models');
+const names = require('../names.json');
 
 const Character = models.Character;
 
@@ -15,28 +16,26 @@ const makerPage = (req, res) => {
 
 const deleteCharacter = (req, res) => {
   const id = req.body.id;
-  console.dir(id);
   const characterPromise = Character.CharacterModel.findOneAndRemove({ _id: id });
   characterPromise.then(() => res.json({ redirect: '/maker' }));
 };
 
-const saveCharacter = (req) => {
+const saveCharacter = (req, res) => {
   const id = req.body.id;
-  console.dir(id);
   Character.CharacterModel.findOne({ _id: id }, (err, doc) => {
     const character = doc;
     character.xp = req.body.xp;
     character.xpNeeded = req.body.xpNeeded;
     character.level = req.body.level;
-
-    character.save();
+    character.upgrades = req.body.upgrades.split(',');
+    const savePromise = new Character.CharacterModel(character).save();
+    savePromise.then(() => res.json({ redirect: '/maker' }));
   });
 };
 
 const makeCharacter = (req, res) => {
-  if (!req.body.name) {
-    return res.status(400).json({ error: 'A name is required' });
-  }
+  // Give the character a name from our list
+  const name = names.names[Math.floor(Math.random() * names.names.length)];
 
   // Set the rarity of the character
   // Common - 54%
@@ -57,11 +56,13 @@ const makeCharacter = (req, res) => {
   }
 
   const characterData = {
-    name: req.body.name,
+    name,
     rarity,
     level: 1,
     xp: 0,
     xpNeeded: 10,
+    upgrades: [],
+    goldMod: 1,
     owner: req.session.account._id,
   };
 

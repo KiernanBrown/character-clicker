@@ -41,15 +41,18 @@ const LoginWindow = (props) => {
       onSubmit={handleLogin}
       action="/login"
       method="POST"
-      className="mainForm"
+      className="newForm"
       >
       <label htmlFor="username">Username: </label>
-      <input id="user" type="text" name="username" placeholder="username"/>
+      <input id="user" type="text" name="username" placeholder="Username"/>
+      <br />
       <label htmlFor="pass">Password: </label>
-      <input id="pass" type="password" name="pass" placeholder="password"/>
+      <input id="pass" type="password" name="pass" placeholder="Password"/>
+      <br />
       <input type="hidden" name="_csrf" value={props.csrf}/>
-      <input className="formSubmit" type="submit" value="Sign In" />
-    
+      <div className="row">
+        <button className="btn waves-effect waves-light grey" type="submit" name="action">Sign In</button>
+      </div>
     </form>
   );
 };
@@ -60,17 +63,20 @@ const SignupWindow = (props) => {
       onSubmit={handleSignup}
       action="/signup"
       method="POST"
-      className="mainForm"
+      className="newForm"
       >
       <label htmlFor="username">Username: </label>
-      <input id="user" type="text" name="username" placeholder="username"/>
+      <input id="user" type="text" name="username" placeholder="Username"/>
+      <br />
       <label htmlFor="pass">Password: </label>
-      <input id="pass" type="password" name="pass" placeholder="password"/>
+      <input id="pass" type="password" name="pass" placeholder="Password"/>
+      <br />
       <label htmlFor="pass2">Password: </label>
-      <input id="pass2" type="password" name="pass2" placeholder="retype password"/>
+      <input id="pass2" type="password" name="pass2" placeholder="Retype Password"/>
       <input type="hidden" name="_csrf" value={props.csrf}/>
-      <input className="formSubmit" type="submit" value="Sign Up" />
-    
+            <div className="row">
+        <button className="btn waves-effect waves-light grey" type="submit" name="action">Sign Up</button>
+      </div>
     </form>
   );
 };

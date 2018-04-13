@@ -1,6 +1,9 @@
 const handleError = (message) => {
+  // Error message fade out
+  // http://jsfiddle.net/JohnnyWorker/SC7Zm/
   $("#errorMessage").text(message);
-  $("#characterMessage").animate({width:'toggle'},350);
+  $("#characterMessage").show();
+  $("#characterMessage").fadeOut(3000);
 };
 
 const redirect = (response) => {
@@ -17,6 +20,8 @@ const sendAjax = (type, action, data, success) => {
     dataType: "json",
     success: success,
     error: function(xhr, status, error) {
+      console.dir(error);
+      console.warn(xhr.responseText);
       var messageObj = JSON.parse(xhr.responseText);
       handleError(messageObj.error);
     }

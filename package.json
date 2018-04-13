@@ -1,11 +1,11 @@
 {
-  "name": "project2",
+  "name": "character-clicker",
   "version": "1.0.0",
   "engines": {
     "node": "7.5.0",
     "npm": "4.0.5"
   },
-  "description": "Project 2 for Rich Media 2",
+  "description": "Clicker and Gatcha game for Rich Media 2",
   "main": "./server/app.js",
   "scripts": {
     "buildLoginBundle": "babel ./client/login ./client/helper --presets react --out-file ./hosted/loginBundle.js",
@@ -13,6 +13,8 @@
     "build": "npm run buildLoginBundle && npm run buildAppBundle",
     "watchLoginBundle": "babel --watch ./client/login ./client/helper --presets react --out-file ./hosted/loginBundle.js",
     "watchAppBundle": "babel --watch ./client/app ./client/helper --presets react --out-file ./hosted/bundle.js",
+    "watchProfileBundle": "babel --watch ./client/profile ./client/helper --presets react --out-file ./hosted/profileBundle.js",
+    "watchStoreBundle": "babel --watch ./client/store ./client/helper --presets react --out-file ./hosted/storeBundle.js",
     "nodemon": "nodemon --watch ./server ./server/app.js",
     "start": "node ./server/app.js",
     "pretest": "eslint ./server --fix",

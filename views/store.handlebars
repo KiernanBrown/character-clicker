@@ -13,7 +13,7 @@
   <link rel="stylesheet" type="text/css" href="/assets/style.css"/>
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 </head>
-<body>
+<body> 
   <nav>
     <div class="nav-wrapper">
       <a href="/login"><img id="logo" src="/assets/img/face.png" alt="face logo"/></a>
@@ -22,21 +22,12 @@
         <li><a href="/maker">Main</a></li>
         <li><a href="/store">Store</a></li>
         <li><a href="/profile">Profile</a></li>
-        <li>    
-          <span id="currentGold">
-            <i class="material-icons">stars</i>
-            <p id="goldNum">Gold: 0</p>
-          </span>
-        </li>
       </ul>
     </div>
   </nav>
-  <section id="makeCharacter">
-  </section>
-  <section id="characters">
-  </section>
+  <section id="content"></section>
   <div id="characterMessage"><p id="errorMessage"></p></div>
   <input id="csrfToken" type="hidden" name="_csrf" value={props.csrf} />
-  <script src="/assets/bundle.js"></script>
+  <script src="/assets/storeBundle.js"></script>
 </body>
 </html>

@@ -44,22 +44,32 @@ var LoginWindow = function LoginWindow(props) {
       onSubmit: handleLogin,
       action: "/login",
       method: "POST",
-      className: "mainForm"
+      className: "newForm"
     },
     React.createElement(
       "label",
       { htmlFor: "username" },
       "Username: "
     ),
-    React.createElement("input", { id: "user", type: "text", name: "username", placeholder: "username" }),
+    React.createElement("input", { id: "user", type: "text", name: "username", placeholder: "Username" }),
+    React.createElement("br", null),
     React.createElement(
       "label",
       { htmlFor: "pass" },
       "Password: "
     ),
-    React.createElement("input", { id: "pass", type: "password", name: "pass", placeholder: "password" }),
+    React.createElement("input", { id: "pass", type: "password", name: "pass", placeholder: "Password" }),
+    React.createElement("br", null),
     React.createElement("input", { type: "hidden", name: "_csrf", value: props.csrf }),
-    React.createElement("input", { className: "formSubmit", type: "submit", value: "Sign In" })
+    React.createElement(
+      "div",
+      { className: "row" },
+      React.createElement(
+        "button",
+        { className: "btn waves-effect waves-light grey", type: "submit", name: "action" },
+        "Sign In"
+      )
+    )
   );
 };
 
@@ -70,28 +80,38 @@ var SignupWindow = function SignupWindow(props) {
       onSubmit: handleSignup,
       action: "/signup",
       method: "POST",
-      className: "mainForm"
+      className: "newForm"
     },
     React.createElement(
       "label",
       { htmlFor: "username" },
       "Username: "
     ),
-    React.createElement("input", { id: "user", type: "text", name: "username", placeholder: "username" }),
+    React.createElement("input", { id: "user", type: "text", name: "username", placeholder: "Username" }),
+    React.createElement("br", null),
     React.createElement(
       "label",
       { htmlFor: "pass" },
       "Password: "
     ),
-    React.createElement("input", { id: "pass", type: "password", name: "pass", placeholder: "password" }),
+    React.createElement("input", { id: "pass", type: "password", name: "pass", placeholder: "Password" }),
+    React.createElement("br", null),
     React.createElement(
       "label",
       { htmlFor: "pass2" },
       "Password: "
     ),
-    React.createElement("input", { id: "pass2", type: "password", name: "pass2", placeholder: "retype password" }),
+    React.createElement("input", { id: "pass2", type: "password", name: "pass2", placeholder: "Retype Password" }),
     React.createElement("input", { type: "hidden", name: "_csrf", value: props.csrf }),
-    React.createElement("input", { className: "formSubmit", type: "submit", value: "Sign Up" })
+    React.createElement(
+      "div",
+      { className: "row" },
+      React.createElement(
+        "button",
+        { className: "btn waves-effect waves-light grey", type: "submit", name: "action" },
+        "Sign Up"
+      )
+    )
   );
 };
 
@@ -135,7 +155,8 @@ $(document).ready(function () {
 
 var handleError = function handleError(message) {
   $("#errorMessage").text(message);
-  $("#characterMessage").animate({ width: 'toggle' }, 350);
+  $("#characterMessage").show();
+  $("#characterMessage").fadeOut(3000);
 };
 
 var redirect = function redirect(response) {
@@ -152,6 +173,8 @@ var sendAjax = function sendAjax(type, action, data, success) {
     dataType: "json",
     success: success,
     error: function error(xhr, status, _error) {
+      console.dir(_error);
+      console.warn(xhr.responseText);
       var messageObj = JSON.parse(xhr.responseText);
       handleError(messageObj.error);
     }
