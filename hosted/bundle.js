@@ -216,6 +216,10 @@ var SelectedCharacterDiv = function SelectedCharacterDiv(props) {
   }
 };
 
+var addGold = function addGold() {
+  gold += 1000;
+};
+
 // List of all the characters the user has
 var CharacterList = function CharacterList(props) {
   if (props.characters.length === 0) {
@@ -234,6 +238,15 @@ var CharacterList = function CharacterList(props) {
           'a',
           { id: 'createButton', className: 'waves-effect waves-light btn', onClick: createCharacter },
           'Create a Character (2000 Gold)'
+        )
+      ),
+      React.createElement(
+        'p',
+        { className: 'centered' },
+        React.createElement(
+          'a',
+          { id: 'moneyButton', className: 'waves-effect waves-light btn grey', onClick: addGold },
+          'Gain 1000 Gold'
         )
       )
     );
@@ -322,6 +335,15 @@ var CharacterList = function CharacterList(props) {
           { id: 'createButton', className: 'waves-effect waves-light btn', onClick: createCharacter },
           'Create a Character (2000 Gold)'
         )
+      ),
+      React.createElement(
+        'p',
+        { className: 'centered' },
+        React.createElement(
+          'a',
+          { id: 'moneyButton', className: 'waves-effect waves-light btn grey', onClick: addGold },
+          'Gain 1000 Gold'
+        )
       )
     );
   } else {
@@ -346,6 +368,15 @@ var CharacterList = function CharacterList(props) {
           'a',
           { href: '/store', className: 'waves-effect waves-light btn centered purple darken-3 centered' },
           'Buy An Additional Character Slot (20 Gems)'
+        )
+      ),
+      React.createElement(
+        'p',
+        { className: 'centered' },
+        React.createElement(
+          'a',
+          { id: 'moneyButton', className: 'waves-effect waves-light btn grey', onClick: addGold },
+          'Gain 1000 Gold'
         )
       )
     );

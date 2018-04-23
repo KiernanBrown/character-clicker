@@ -171,6 +171,10 @@ const SelectedCharacterDiv = function(props) {
   }
 };
 
+const addGold = () => {
+  gold+=1000;
+};
+
 // List of all the characters the user has
 const CharacterList = function(props) {
   if(props.characters.length === 0) {
@@ -179,6 +183,9 @@ const CharacterList = function(props) {
         <h3 className="emptyCharacter">No Characters Yet</h3>
         <p className="centered">
           <a id="createButton" className="waves-effect waves-light btn" onClick={createCharacter}>Create a Character (2000 Gold)</a>
+        </p>
+        <p className="centered">
+          <a id="moneyButton" className="waves-effect waves-light btn grey" onClick={addGold}>Gain 1000 Gold</a>
         </p>
       </div>
     );
@@ -221,6 +228,9 @@ const CharacterList = function(props) {
         <p className="centered">
           <a id="createButton" className="waves-effect waves-light btn" onClick={createCharacter}>Create a Character (2000 Gold)</a>
         </p>
+        <p className="centered">
+          <a id="moneyButton" className="waves-effect waves-light btn grey" onClick={addGold}>Gain 1000 Gold</a>
+        </p>
       </div>
     );
   } else {
@@ -233,6 +243,9 @@ const CharacterList = function(props) {
         </div>
         <p className="centered">
           <a href="/store" className="waves-effect waves-light btn centered purple darken-3 centered">Buy An Additional Character Slot (20 Gems)</a>
+        </p>
+        <p className="centered">
+          <a id="moneyButton" className="waves-effect waves-light btn grey" onClick={addGold}>Gain 1000 Gold</a>
         </p>
       </div>
     );

@@ -18,6 +18,7 @@ const router = (app) => {
   app.post('/saveCharacter', mid.requiresLogin, controllers.Character.save);
   app.post('/saveAccount', mid.requiresLogin, controllers.Account.save);
   app.get('/', mid.requiresSecure, mid.requiresLogout, controllers.Account.loginPage);
+  app.get('/*', mid.requiresLogin, controllers.Character.makerPage);
 };
 
 module.exports = router;
