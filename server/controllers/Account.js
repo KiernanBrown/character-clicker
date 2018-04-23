@@ -144,6 +144,7 @@ const saveAccount = (request, res) => {
   Account.AccountModel.findOne({ _id: id }, (err, doc) => {
     const account = doc;
     account.gold = req.body.gold;
+    account.lastUpdate = Date.now();
     const savePromise = new Account.AccountModel(account).save();
     savePromise.then(() => {
       req.session.account = account;

@@ -17,6 +17,10 @@ const saveToDB = () => {
   }
 };
 
+const initializeTooltips = () => {
+  $('.tooltipped').tooltip({ delay: 50 });
+};
+
 // Function to create a character
 const createCharacter = (e) => {
   e.preventDefault();
@@ -52,6 +56,8 @@ const checkLevelUp = () => {
   if (selectedCharacter.xp >= selectedCharacter.xpNeeded) {
     selectedCharacter.xp -= selectedCharacter.xpNeeded;
     selectedCharacter.level++;
+    selectedCharacter.attack++;
+    selectedCharacter.defense++;
     selectedCharacter.xpNeeded = Math.floor(selectedCharacter.xpNeeded ** 1.12);
     checkLevelUp();
   }
@@ -90,48 +96,43 @@ const updateGold = () => {
   document.querySelector('#goldNum').textContent = `Gold: ${Math.floor(gold)}`;
 };
 
-// Purchases the Golden Touch upgrade for the selected character (double gold)
-const purchaseGolden = () => {
-  if (selectedCharacter.upgrades.includes('Golden Touch')) {
-    handleError('This character already has this upgrade');
-    return false;
-  } 
+const UpgradeButton = function(props) {
+  const upgrade = props.upgrade;
+  const character = props.character;
+  const cost = props.cost;
+  const description = props.description;
   
-  if (gold < 1000) {
-    handleError("You don't have enough gold");
-    return false;
+  const purchaseUpgrade = () => {
+    if (character.upgrades.includes(upgrade)) {
+      handleError('This character already has this upgrade');
+      return false;
+    }
+    
+    if (gold >= cost) {
+      gold -= cost;
+      character.upgrades.push(upgrade);
+      
+      updateGoldMods();
+      saveToDB();
+      
+      ReactDOM.render(
+        <CharacterList csrf={csrfToken} characters={characters} />, document.querySelector("#characters")
+      );
+    } else {
+      handleError("You don't have enough gold");
+      return false;
+    }
+  };
+  
+  if (character.upgrades.includes(upgrade)) {
+    return (
+      <a className="waves-effect waves-light btn tooltipped centered green darken-1 upgrade disabled">Purchase {upgrade} ({cost} Gold)</a>
+    );
+  } else {
+        return (
+      <a className="waves-effect waves-light btn tooltipped centered green darken-1 upgrade" onClick={purchaseUpgrade} data-position="bottom" data-tooltip={description} >Purchase {upgrade} ({cost} Gold)</a>
+    );
   }
-  
-  gold -= 1000;
-  selectedCharacter.upgrades.push('Golden Touch');
-  
-  updateGoldMods();
-  saveToDB();
-  ReactDOM.render(
-    <CharacterList csrf={csrfToken} characters={characters} />, document.querySelector("#characters")
-  );
-};
-
-// Purchases the Dedicated Trainer upgrade for the selected character (double xp)
-const purchaseDedicated = () => {
-  if (selectedCharacter.upgrades.includes('Dedicated Trainer')) {
-    handleError('This character already has this upgrade');
-    return false;
-  } 
-  
-  if (gold < 1000) {
-    handleError("You don't have enough gold");
-    return false;
-  }
-  
-  gold -= 1000;
-  selectedCharacter.upgrades.push('Dedicated Trainer');
-  
-  saveToDB();
-  
-  ReactDOM.render(
-    <CharacterList csrf={csrfToken} characters={characters} />, document.querySelector("#characters")
-  );
 };
 
 // Create the div for the selected character
@@ -149,53 +150,20 @@ const SelectedCharacterDiv = function(props) {
     }
   };
   
-  // Only display upgrades if the character is level 5 or higher
-  if(character.level >= 5) {
-    if(selectedCharacter.upgrades.includes('Golden Touch') && selectedCharacter.upgrades.includes('Dedicated Trainer')) {
-      return(
-        <div className="characterMenu">
-          <p>Current XP: {character.xp} XP Needed For Level Up: {character.xpNeeded}</p>
-            <a className="waves-effect waves-light btn centered purple darken-3" onClick={handleClick}>Train Character</a>
-            <a className="waves-effect waves-light btn centered red darken-4" onClick={deleteCharacter}>Delete Character</a>
-            <a className="waves-effect waves-light btn centered green darken-1 upgrade disabled" onClick={purchaseGolden}>Purchase Golden Touch (1000 Gold)</a>
-            <a className="waves-effect waves-light btn centered green darken-1 upgrade disabled" onClick={purchaseDedicated}>Purchase Dedicated Trainer (1000 Gold)</a>
-        </div>
-      );
-    } else if (selectedCharacter.upgrades.includes('Golden Touch')) {
-      return(
-        <div className="characterMenu">
-          <p>Current XP: {character.xp} XP Needed For Level Up: {character.xpNeeded}</p>
-            <a className="waves-effect waves-light btn centered purple darken-3" onClick={handleClick}>Train Character</a>
-            <a className="waves-effect waves-light btn centered red darken-4" onClick={deleteCharacter}>Delete Character</a>
-            <a className="waves-effect waves-light btn centered green darken-1 upgrade disabled" onClick={purchaseGolden}>Purchase Golden Touch (1000 Gold)</a>
-            <a className="waves-effect waves-light btn centered green darken-1 upgrade" onClick={purchaseDedicated}>Purchase Dedicated Trainer (1000 Gold)</a>
-        </div>
-      );
-    } else if (selectedCharacter.upgrades.includes('Dedicated Trainer')) {
-      return(
-        <div className="characterMenu">
-          <p>Current XP: {character.xp} XP Needed For Level Up: {character.xpNeeded}</p>
-            <a className="waves-effect waves-light btn centered purple darken-3" onClick={handleClick}>Train Character</a>
-            <a className="waves-effect waves-light btn centered red darken-4" onClick={deleteCharacter}>Delete Character</a>
-            <a className="waves-effect waves-light btn centered green darken-1 upgrade" onClick={purchaseGolden}>Purchase Golden Touch (1000 Gold)</a>
-            <a className="waves-effect waves-light btn centered green darken-1 upgrade disabled" onClick={purchaseDedicated}>Purchase Dedicated Trainer (1000 Gold)</a>
-        </div>
-      );
-    } else {
-      return(
-        <div className="characterMenu">
-          <p>Current XP: {character.xp} XP Needed For Level Up: {character.xpNeeded}</p>
-            <a className="waves-effect waves-light btn centered purple darken-3" onClick={handleClick}>Train Character</a>
-            <a className="waves-effect waves-light btn centered red darken-4" onClick={deleteCharacter}>Delete Character</a>
-            <a className="waves-effect waves-light btn centered green darken-1 upgrade" onClick={purchaseGolden}>Purchase Golden Touch (1000 Gold)</a>
-            <a className="waves-effect waves-light btn centered green darken-1 upgrade" onClick={purchaseDedicated}>Purchase Dedicated Trainer (1000 Gold)</a>
-        </div>
-      );
-    }
+  if (character.level >= 5) {
+    return(
+      <div className="characterMenu">
+        <p>Current XP: {character.xp} XP Needed For Level Up: {character.xpNeeded} Attack: {character.attack} Defense: {character.defense}</p>
+        <a className="waves-effect waves-light btn centered purple darken-3" onClick={handleClick}>Train Character</a>
+        <a className="waves-effect waves-light btn centered red darken-4" onClick={deleteCharacter}>Delete Character</a>
+        <UpgradeButton character={selectedCharacter} cost="1000" upgrade="Golden Touch" description="Doubles gold generated by this character"/>
+        <UpgradeButton character={selectedCharacter} cost="1000" upgrade="Dedicated Trainer" description="Doubles xp gained by this character"/>
+      </div>
+    );
   } else {
     return(
       <div className="characterMenu">
-        <p>Current XP: {character.xp} XP Needed For Level Up: {character.xpNeeded}</p>
+        <p>Current XP: {character.xp} XP Needed For Level Up: {character.xpNeeded} Attack: {character.attack} Defense: {character.defense}</p>
         <a className="waves-effect waves-light btn centered purple darken-3" onClick={handleClick}>Train Character</a>
         <a className="waves-effect waves-light btn centered red darken-4" onClick={deleteCharacter}>Delete Character</a>
       </div>
@@ -272,34 +240,68 @@ const CharacterList = function(props) {
 };
 
 // Gets our characters from the server
-const loadCharactersFromServer = (csrf) => {
+const loadCharactersFromServer = (csrf, passedTime) => {
   sendAjax('GET', '/getCharacters', null, (data) => {
     characters = data.characters;
     ReactDOM.render(
       <CharacterList csrf={csrf} characters={data.characters} />, document.querySelector("#characters")
     );
     updateGoldMods();
+    
+    if (passedTime >= 60) {
+      offlineProduction(passedTime);
+    }
   });
 };
 
-const setup = function(csrf) {
+const setup = function(csrf, passedTime) {
   csrfToken = csrf;
   
   ReactDOM.render(
     <CharacterList csrf={csrf} characters={[]} />, document.querySelector("#characters")
   );
   
-  loadCharactersFromServer(csrf);
+  loadCharactersFromServer(csrf, passedTime);
   
   setInterval(saveToDB, 5000);
   setInterval(updateGold, 1000);
 };
 
+// Add to our gold based on our production  
+const offlineProduction = (time) => {
+  let addedGold = 0;
+  for (let i = 0; i < characters.length; i++) {
+    addedGold += characters[i].level * characters[i].goldMod;
+  }
+  
+  addedGold = Math.floor((addedGold / 5) * time);
+  gold += addedGold;
+  
+  document.querySelector('#goldNum').textContent = `Gold: ${Math.floor(gold)}`;
+  
+  handleError(`Welcome back! You gained ${addedGold} while offline.`);
+};
+
 const getToken = () => {
   sendAjax('GET', '/getToken', null, (result) => {
     account = result.account;
+    
+    // Compare the current time against the lastUpdate for the account
+    // If more than a minute has passed, give offline production
+    // Comparing times code from here:
+    // https://stackoverflow.com/questions/1787939/check-time-difference-in-javascript?utm_medium=organic&utm_source=google_rich_qa&utm_campaign=google_rich_qa
+    const accountTime = Date.parse(account.lastUpdate);
+    const currentTime = Date.now();
+    account.lastUpdate = currentTime;
+    
+    if (currentTime < accountTime) {
+      currentTime.setDate(currentTime.getDate() + 1);
+    }
+    
+    const passedTime = Math.floor((currentTime - accountTime) / 1000);
+    
     gold = account.gold;
-    setup(result.csrfToken);
+    setup(result.csrfToken, passedTime);
   });
 };
 

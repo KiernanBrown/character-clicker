@@ -19,6 +19,10 @@ var saveToDB = function saveToDB() {
   }
 };
 
+var initializeTooltips = function initializeTooltips() {
+  $('.tooltipped').tooltip({ delay: 50 });
+};
+
 // Function to create a character
 var createCharacter = function createCharacter(e) {
   e.preventDefault();
@@ -52,6 +56,8 @@ var checkLevelUp = function checkLevelUp() {
   if (selectedCharacter.xp >= selectedCharacter.xpNeeded) {
     selectedCharacter.xp -= selectedCharacter.xpNeeded;
     selectedCharacter.level++;
+    selectedCharacter.attack++;
+    selectedCharacter.defense++;
     selectedCharacter.xpNeeded = Math.floor(Math.pow(selectedCharacter.xpNeeded, 1.12));
     checkLevelUp();
   }
@@ -87,44 +93,53 @@ var updateGold = function updateGold() {
   document.querySelector('#goldNum').textContent = 'Gold: ' + Math.floor(gold);
 };
 
-// Purchases the Golden Touch upgrade for the selected character (double gold)
-var purchaseGolden = function purchaseGolden() {
-  if (selectedCharacter.upgrades.includes('Golden Touch')) {
-    handleError('This character already has this upgrade');
-    return false;
+var UpgradeButton = function UpgradeButton(props) {
+  var upgrade = props.upgrade;
+  var character = props.character;
+  var cost = props.cost;
+  var description = props.description;
+
+  var purchaseUpgrade = function purchaseUpgrade() {
+    if (character.upgrades.includes(upgrade)) {
+      handleError('This character already has this upgrade');
+      return false;
+    }
+
+    if (gold >= cost) {
+      gold -= cost;
+      character.upgrades.push(upgrade);
+
+      updateGoldMods();
+      saveToDB();
+
+      ReactDOM.render(React.createElement(CharacterList, { csrf: csrfToken, characters: characters }), document.querySelector("#characters"));
+    } else {
+      handleError("You don't have enough gold");
+      return false;
+    }
+  };
+
+  if (character.upgrades.includes(upgrade)) {
+    return React.createElement(
+      'a',
+      { className: 'waves-effect waves-light btn tooltipped centered green darken-1 upgrade disabled' },
+      'Purchase ',
+      upgrade,
+      ' (',
+      cost,
+      ' Gold)'
+    );
+  } else {
+    return React.createElement(
+      'a',
+      { className: 'waves-effect waves-light btn tooltipped centered green darken-1 upgrade', onClick: purchaseUpgrade, 'data-position': 'bottom', 'data-tooltip': description },
+      'Purchase ',
+      upgrade,
+      ' (',
+      cost,
+      ' Gold)'
+    );
   }
-
-  if (gold < 1000) {
-    handleError("You don't have enough gold");
-    return false;
-  }
-
-  gold -= 1000;
-  selectedCharacter.upgrades.push('Golden Touch');
-
-  updateGoldMods();
-  saveToDB();
-  ReactDOM.render(React.createElement(CharacterList, { csrf: csrfToken, characters: characters }), document.querySelector("#characters"));
-};
-
-// Purchases the Dedicated Trainer upgrade for the selected character (double xp)
-var purchaseDedicated = function purchaseDedicated() {
-  if (selectedCharacter.upgrades.includes('Dedicated Trainer')) {
-    handleError('This character already has this upgrade');
-    return false;
-  }
-
-  if (gold < 1000) {
-    handleError("You don't have enough gold");
-    return false;
-  }
-
-  gold -= 1000;
-  selectedCharacter.upgrades.push('Dedicated Trainer');
-
-  saveToDB();
-
-  ReactDOM.render(React.createElement(CharacterList, { csrf: csrfToken, characters: characters }), document.querySelector("#characters"));
 };
 
 // Create the div for the selected character
@@ -142,141 +157,35 @@ var SelectedCharacterDiv = function SelectedCharacterDiv(props) {
     }
   };
 
-  // Only display upgrades if the character is level 5 or higher
   if (character.level >= 5) {
-    if (selectedCharacter.upgrades.includes('Golden Touch') && selectedCharacter.upgrades.includes('Dedicated Trainer')) {
-      return React.createElement(
-        'div',
-        { className: 'characterMenu' },
-        React.createElement(
-          'p',
-          null,
-          'Current XP: ',
-          character.xp,
-          ' XP Needed For Level Up: ',
-          character.xpNeeded
-        ),
-        React.createElement(
-          'a',
-          { className: 'waves-effect waves-light btn centered purple darken-3', onClick: handleClick },
-          'Train Character'
-        ),
-        React.createElement(
-          'a',
-          { className: 'waves-effect waves-light btn centered red darken-4', onClick: deleteCharacter },
-          'Delete Character'
-        ),
-        React.createElement(
-          'a',
-          { className: 'waves-effect waves-light btn centered green darken-1 upgrade disabled', onClick: purchaseGolden },
-          'Purchase Golden Touch (1000 Gold)'
-        ),
-        React.createElement(
-          'a',
-          { className: 'waves-effect waves-light btn centered green darken-1 upgrade disabled', onClick: purchaseDedicated },
-          'Purchase Dedicated Trainer (1000 Gold)'
-        )
-      );
-    } else if (selectedCharacter.upgrades.includes('Golden Touch')) {
-      return React.createElement(
-        'div',
-        { className: 'characterMenu' },
-        React.createElement(
-          'p',
-          null,
-          'Current XP: ',
-          character.xp,
-          ' XP Needed For Level Up: ',
-          character.xpNeeded
-        ),
-        React.createElement(
-          'a',
-          { className: 'waves-effect waves-light btn centered purple darken-3', onClick: handleClick },
-          'Train Character'
-        ),
-        React.createElement(
-          'a',
-          { className: 'waves-effect waves-light btn centered red darken-4', onClick: deleteCharacter },
-          'Delete Character'
-        ),
-        React.createElement(
-          'a',
-          { className: 'waves-effect waves-light btn centered green darken-1 upgrade disabled', onClick: purchaseGolden },
-          'Purchase Golden Touch (1000 Gold)'
-        ),
-        React.createElement(
-          'a',
-          { className: 'waves-effect waves-light btn centered green darken-1 upgrade', onClick: purchaseDedicated },
-          'Purchase Dedicated Trainer (1000 Gold)'
-        )
-      );
-    } else if (selectedCharacter.upgrades.includes('Dedicated Trainer')) {
-      return React.createElement(
-        'div',
-        { className: 'characterMenu' },
-        React.createElement(
-          'p',
-          null,
-          'Current XP: ',
-          character.xp,
-          ' XP Needed For Level Up: ',
-          character.xpNeeded
-        ),
-        React.createElement(
-          'a',
-          { className: 'waves-effect waves-light btn centered purple darken-3', onClick: handleClick },
-          'Train Character'
-        ),
-        React.createElement(
-          'a',
-          { className: 'waves-effect waves-light btn centered red darken-4', onClick: deleteCharacter },
-          'Delete Character'
-        ),
-        React.createElement(
-          'a',
-          { className: 'waves-effect waves-light btn centered green darken-1 upgrade', onClick: purchaseGolden },
-          'Purchase Golden Touch (1000 Gold)'
-        ),
-        React.createElement(
-          'a',
-          { className: 'waves-effect waves-light btn centered green darken-1 upgrade disabled', onClick: purchaseDedicated },
-          'Purchase Dedicated Trainer (1000 Gold)'
-        )
-      );
-    } else {
-      return React.createElement(
-        'div',
-        { className: 'characterMenu' },
-        React.createElement(
-          'p',
-          null,
-          'Current XP: ',
-          character.xp,
-          ' XP Needed For Level Up: ',
-          character.xpNeeded
-        ),
-        React.createElement(
-          'a',
-          { className: 'waves-effect waves-light btn centered purple darken-3', onClick: handleClick },
-          'Train Character'
-        ),
-        React.createElement(
-          'a',
-          { className: 'waves-effect waves-light btn centered red darken-4', onClick: deleteCharacter },
-          'Delete Character'
-        ),
-        React.createElement(
-          'a',
-          { className: 'waves-effect waves-light btn centered green darken-1 upgrade', onClick: purchaseGolden },
-          'Purchase Golden Touch (1000 Gold)'
-        ),
-        React.createElement(
-          'a',
-          { className: 'waves-effect waves-light btn centered green darken-1 upgrade', onClick: purchaseDedicated },
-          'Purchase Dedicated Trainer (1000 Gold)'
-        )
-      );
-    }
+    return React.createElement(
+      'div',
+      { className: 'characterMenu' },
+      React.createElement(
+        'p',
+        null,
+        'Current XP: ',
+        character.xp,
+        ' XP Needed For Level Up: ',
+        character.xpNeeded,
+        ' Attack: ',
+        character.attack,
+        ' Defense: ',
+        character.defense
+      ),
+      React.createElement(
+        'a',
+        { className: 'waves-effect waves-light btn centered purple darken-3', onClick: handleClick },
+        'Train Character'
+      ),
+      React.createElement(
+        'a',
+        { className: 'waves-effect waves-light btn centered red darken-4', onClick: deleteCharacter },
+        'Delete Character'
+      ),
+      React.createElement(UpgradeButton, { character: selectedCharacter, cost: '1000', upgrade: 'Golden Touch', description: 'Doubles gold generated by this character' }),
+      React.createElement(UpgradeButton, { character: selectedCharacter, cost: '1000', upgrade: 'Dedicated Trainer', description: 'Doubles xp gained by this character' })
+    );
   } else {
     return React.createElement(
       'div',
@@ -287,7 +196,11 @@ var SelectedCharacterDiv = function SelectedCharacterDiv(props) {
         'Current XP: ',
         character.xp,
         ' XP Needed For Level Up: ',
-        character.xpNeeded
+        character.xpNeeded,
+        ' Attack: ',
+        character.attack,
+        ' Defense: ',
+        character.defense
       ),
       React.createElement(
         'a',
@@ -440,30 +353,64 @@ var CharacterList = function CharacterList(props) {
 };
 
 // Gets our characters from the server
-var loadCharactersFromServer = function loadCharactersFromServer(csrf) {
+var loadCharactersFromServer = function loadCharactersFromServer(csrf, passedTime) {
   sendAjax('GET', '/getCharacters', null, function (data) {
     characters = data.characters;
     ReactDOM.render(React.createElement(CharacterList, { csrf: csrf, characters: data.characters }), document.querySelector("#characters"));
     updateGoldMods();
+
+    if (passedTime >= 60) {
+      offlineProduction(passedTime);
+    }
   });
 };
 
-var setup = function setup(csrf) {
+var setup = function setup(csrf, passedTime) {
   csrfToken = csrf;
 
   ReactDOM.render(React.createElement(CharacterList, { csrf: csrf, characters: [] }), document.querySelector("#characters"));
 
-  loadCharactersFromServer(csrf);
+  loadCharactersFromServer(csrf, passedTime);
 
   setInterval(saveToDB, 5000);
   setInterval(updateGold, 1000);
 };
 
+// Add to our gold based on our production  
+var offlineProduction = function offlineProduction(time) {
+  var addedGold = 0;
+  for (var i = 0; i < characters.length; i++) {
+    addedGold += characters[i].level * characters[i].goldMod;
+  }
+
+  addedGold = Math.floor(addedGold / 5 * time);
+  gold += addedGold;
+
+  document.querySelector('#goldNum').textContent = 'Gold: ' + Math.floor(gold);
+
+  handleError('Welcome back! You gained ' + addedGold + ' while offline.');
+};
+
 var getToken = function getToken() {
   sendAjax('GET', '/getToken', null, function (result) {
     account = result.account;
+
+    // Compare the current time against the lastUpdate for the account
+    // If more than a minute has passed, give offline production
+    // Comparing times code from here:
+    // https://stackoverflow.com/questions/1787939/check-time-difference-in-javascript?utm_medium=organic&utm_source=google_rich_qa&utm_campaign=google_rich_qa
+    var accountTime = Date.parse(account.lastUpdate);
+    var currentTime = Date.now();
+    account.lastUpdate = currentTime;
+
+    if (currentTime < accountTime) {
+      currentTime.setDate(currentTime.getDate() + 1);
+    }
+
+    var passedTime = Math.floor((currentTime - accountTime) / 1000);
+
     gold = account.gold;
-    setup(result.csrfToken);
+    setup(result.csrfToken, passedTime);
   });
 };
 
@@ -473,6 +420,8 @@ $(document).ready(function () {
 "use strict";
 
 var handleError = function handleError(message) {
+  // Error message fade out
+  // http://jsfiddle.net/JohnnyWorker/SC7Zm/
   $("#errorMessage").text(message);
   $("#characterMessage").show();
   $("#characterMessage").fadeOut(3000);

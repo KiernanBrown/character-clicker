@@ -39,6 +39,18 @@ const CharacterSchema = new mongoose.Schema({
     required: true,
   },
 
+  attack: {
+    type: Number,
+    min: 0,
+    required: true,
+  },
+
+  defense: {
+    type: Number,
+    min: 0,
+    required: true,
+  },
+
   owner: {
     type: mongoose.Schema.ObjectId,
     required: true,
@@ -62,6 +74,8 @@ CharacterSchema.statics.toAPI = (doc) => ({
   xp: doc.xp,
   upgrades: doc.upgrades,
   xpNeeded: doc.xpNeeded,
+  attack: doc.attack,
+  defense: doc.defense,
   goldMod: doc.goldMod,
 });
 
@@ -70,7 +84,7 @@ CharacterSchema.statics.findByOwner = (ownerId, callback) => {
     owner: convertId(ownerId),
   };
 
-  return CharacterModel.find(search).select('name rarity level xp xpNeeded upgrades')
+  return CharacterModel.find(search).select('name rarity level xp xpNeeded upgrades attack defense')
   .exec(callback);
 };
 

@@ -31,6 +31,8 @@ var ProfileWindow = function ProfileWindow(props) {
     document.getElementById('passwordForm').submit();
   };
 
+  // Button submit for forms
+  // https://stackoverflow.com/questions/38030863/materializecss-form-input-submit-button?utm_medium=organic&utm_source=google_rich_qa&utm_campaign=google_rich_qa
   return React.createElement(
     'div',
     { id: 'profileInfo' },
@@ -115,6 +117,8 @@ $(document).ready(function () {
 "use strict";
 
 var handleError = function handleError(message) {
+  // Error message fade out
+  // http://jsfiddle.net/JohnnyWorker/SC7Zm/
   $("#errorMessage").text(message);
   $("#characterMessage").show();
   $("#characterMessage").fadeOut(3000);

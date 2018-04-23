@@ -28,6 +28,9 @@ const AccountSchema = new mongoose.Schema({
     type: Number,
     min: 0,
   },
+  lastUpdate: {
+    type: Date,
+  },
   createdDate: {
     type: Date,
     default: Date.now,
@@ -39,6 +42,7 @@ AccountSchema.statics.toAPI = doc => ({
   username: doc.username,
   _id: doc._id,
   gold: doc.gold,
+  lastUpdate: doc.lastUpdate,
 });
 
 const validatePassword = (doc, password, callback) => {

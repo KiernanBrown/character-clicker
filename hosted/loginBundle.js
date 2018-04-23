@@ -154,6 +154,8 @@ $(document).ready(function () {
 "use strict";
 
 var handleError = function handleError(message) {
+  // Error message fade out
+  // http://jsfiddle.net/JohnnyWorker/SC7Zm/
   $("#errorMessage").text(message);
   $("#characterMessage").show();
   $("#characterMessage").fadeOut(3000);

@@ -44,15 +44,25 @@ const makeCharacter = (req, res) => {
   // Epic - 6%
   // Legendary - 2%
   let rarity = 'Common';
+  let attack = Math.round(Math.random() * 3);
+  let defense = Math.round(Math.random() * 3);
   const rarityNum = Math.floor(Math.random() * 50);
   if (rarityNum >= 27 && rarityNum < 40) {
     rarity = 'Uncommon';
+    attack = Math.round(Math.random() * 3) + 2;
+    defense = Math.round(Math.random() * 3) + 2;
   } else if (rarityNum >= 40 && rarityNum < 46) {
     rarity = 'Rare';
+    attack = Math.round(Math.random() * 3) + 4;
+    defense = Math.round(Math.random() * 3) + 4;
   } else if (rarityNum >= 46 && rarityNum <= 48) {
     rarity = 'Epic';
+    attack = Math.round(Math.random() * 3) + 5;
+    defense = Math.round(Math.random() * 3) + 5;
   } else if (rarityNum === 49) {
     rarity = 'Legendary';
+    attack = Math.round(Math.random() * 3) + 6;
+    defense = Math.round(Math.random() * 3) + 6;
   }
 
   const characterData = {
@@ -61,6 +71,8 @@ const makeCharacter = (req, res) => {
     level: 1,
     xp: 0,
     xpNeeded: 10,
+    attack,
+    defense,
     upgrades: [],
     goldMod: 1,
     owner: req.session.account._id,
