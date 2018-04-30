@@ -20,8 +20,8 @@
       <ul id="nav-mobile" class="right">
         <li><a href="/logout">Log out</a></li>
         <li><a href="/maker">Main</a></li>
-        <li><a href="/battle">Battle</a></li>
-        <li class="active"><a href="/store">Store</a></li>
+        <li class="active"><a href="/battle" class="active">Battle</a></li>
+        <li><a href="/store">Store</a></li>
         <li><a href="/profile">Profile</a></li>
       </ul>
     </div>
@@ -29,6 +29,6 @@
   <section id="content"></section>
   <div id="characterMessage"><p id="errorMessage"></p></div>
   <input id="csrfToken" type="hidden" name="_csrf" value={props.csrf} />
-  <script src="/assets/storeBundle.js"></script>
+  <script src="/assets/battleBundle.js"></script>
 </body>
 </html>

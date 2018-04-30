@@ -28,6 +28,14 @@ const AccountSchema = new mongoose.Schema({
     type: Number,
     min: 0,
   },
+  goldCap: {
+    type: Number,
+    min: 0,
+  },
+  battlesCompleted: {
+    type: Number,
+    min: 0,
+  },
   lastUpdate: {
     type: Date,
   },
@@ -42,6 +50,8 @@ AccountSchema.statics.toAPI = doc => ({
   username: doc.username,
   _id: doc._id,
   gold: doc.gold,
+  goldCap: doc.goldCap,
+  battlesCompleted: doc.battlesCompleted,
   lastUpdate: doc.lastUpdate,
 });
 

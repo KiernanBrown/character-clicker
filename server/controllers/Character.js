@@ -27,6 +27,8 @@ const saveCharacter = (req, res) => {
     character.xp = req.body.xp;
     character.xpNeeded = req.body.xpNeeded;
     character.level = req.body.level;
+    character.attack = req.body.attack;
+    character.defense = req.body.defense;
     character.upgrades = req.body.upgrades.split(',');
     const savePromise = new Character.CharacterModel(character).save();
     savePromise.then(() => res.json({ redirect: '/maker' }));
@@ -44,25 +46,25 @@ const makeCharacter = (req, res) => {
   // Epic - 6%
   // Legendary - 2%
   let rarity = 'Common';
-  let attack = Math.round(Math.random() * 3);
-  let defense = Math.round(Math.random() * 3);
+  let attack = Math.ceil(Math.random() * 3);
+  let defense = Math.ceil(Math.random() * 3);
   const rarityNum = Math.floor(Math.random() * 50);
   if (rarityNum >= 27 && rarityNum < 40) {
     rarity = 'Uncommon';
-    attack = Math.round(Math.random() * 3) + 2;
-    defense = Math.round(Math.random() * 3) + 2;
+    attack = Math.ceil(Math.random() * 3) + 2;
+    defense = Math.ceil(Math.random() * 3) + 2;
   } else if (rarityNum >= 40 && rarityNum < 46) {
     rarity = 'Rare';
-    attack = Math.round(Math.random() * 3) + 4;
-    defense = Math.round(Math.random() * 3) + 4;
+    attack = Math.ceil(Math.random() * 3) + 4;
+    defense = Math.ceil(Math.random() * 3) + 4;
   } else if (rarityNum >= 46 && rarityNum <= 48) {
     rarity = 'Epic';
-    attack = Math.round(Math.random() * 3) + 5;
-    defense = Math.round(Math.random() * 3) + 5;
+    attack = Math.ceil(Math.random() * 3) + 5;
+    defense = Math.ceil(Math.random() * 3) + 5;
   } else if (rarityNum === 49) {
     rarity = 'Legendary';
-    attack = Math.round(Math.random() * 3) + 6;
-    defense = Math.round(Math.random() * 3) + 6;
+    attack = Math.ceil(Math.random() * 3) + 6;
+    defense = Math.ceil(Math.random() * 3) + 6;
   }
 
   const characterData = {
@@ -78,11 +80,7 @@ const makeCharacter = (req, res) => {
     owner: req.session.account._id,
   };
 
-  console.dir(characterData);
-
   const newCharacter = new Character.CharacterModel(characterData);
-
-  console.dir(newCharacter);
 
   const characterPromise = newCharacter.save();
 

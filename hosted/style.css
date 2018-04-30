@@ -353,3 +353,23 @@ https://stackoverflow.com/questions/37127123/change-color-of-underline-input-and
 .info {
   padding: 20px;
 }
+
+#battleInfo {
+  margin: auto;
+  font-size: 20px;
+  width: 50%;
+}
+
+.battleDiv {
+  width: 40%;
+  margin: auto;
+  margin-top: 100px;
+  border: 2px solid #681300;
+  border-radius: 4px;
+  background-color: rgba(206, 52, 18, 0.4);
+  padding: 10px;
+}
+
+.battleDiv h5 {
+  padding: 8px;
+}

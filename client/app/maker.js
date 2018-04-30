@@ -4,16 +4,17 @@ let csrfToken = '';
 let characters = [];
 let gold = 0;
 let account = {};
+let goldCap = 2000;
 
 // Update all of our characters in the database
 // We call this every 30 seconds as a way of autosaving
 const saveToDB = () => {
   console.dir('Saved to the db!');
-  sendAjax('POST', '/saveAccount', `id=${account._id}&gold=${gold}&_csrf=${csrfToken}`);
+  sendAjax('POST', '/saveAccount', `id=${account._id}&gold=${gold}&battlesCompleted=${account.battlesCompleted}&_csrf=${csrfToken}`);
   
   for (let i = 0; i < characters.length; i++) {
     const character = characters[i];
-    sendAjax('POST', '/saveCharacter', `id=${character._id}&xp=${character.xp}&xpNeeded=${character.xpNeeded}&level=${character.level}&upgrades=${character.upgrades}&_csrf=${csrfToken}`);
+    sendAjax('POST', '/saveCharacter', `id=${character._id}&xp=${character.xp}&xpNeeded=${character.xpNeeded}&level=${character.level}&attack=${character.attack}&defense=${character.defense}&upgrades=${character.upgrades}&_csrf=${csrfToken}`);
   }
 };
 
@@ -40,27 +41,45 @@ const createCharacter = (e) => {
   return false;
 };
 
-// Function to handle clicking to train a character
-const handleClick = () => {
-  selectedCharacter.xp++;
-  if(selectedCharacter.upgrades.includes('Dedicated Trainer')) selectedCharacter.xp++;
-  checkLevelUp();
+// Function to check if a character should level up
+const checkLevelUp = (chara) => {
+  const character = chara;
+  if (character.xp >= character.xpNeeded) {
+    character.xp -= character.xpNeeded;
+    character.level++;
+    character.attack++;
+    character.defense++;
+    character.xpNeeded = Math.floor(character.xpNeeded ** 1.09);
+    checkLevelUp(character);
+  }
+};
+
+// Function to give each character xp every 10 seconds
+const updateXP = () => {
+  for (let i = 0; i < characters.length; i++) {
+    const character = characters[i];
+    character.xp++;
+    if (character.upgrades.includes('Dedicated Trainer')) character.xp++;
+    checkLevelUp(character);
+  }
+  
   updateCharacter();
   ReactDOM.render(
     <CharacterList csrf={csrfToken} characters={characters} />, document.querySelector("#characters")
   );
+  
+  saveToDB();
 };
 
-// Function to check if a character should level up
-const checkLevelUp = () => {
-  if (selectedCharacter.xp >= selectedCharacter.xpNeeded) {
-    selectedCharacter.xp -= selectedCharacter.xpNeeded;
-    selectedCharacter.level++;
-    selectedCharacter.attack++;
-    selectedCharacter.defense++;
-    selectedCharacter.xpNeeded = Math.floor(selectedCharacter.xpNeeded ** 1.12);
-    checkLevelUp();
-  }
+// Function to handle clicking to train a character
+const handleClick = () => {
+  selectedCharacter.xp++;
+  if (selectedCharacter.upgrades.includes('Dedicated Trainer')) selectedCharacter.xp++;
+  checkLevelUp(selectedCharacter);
+  updateCharacter();
+  ReactDOM.render(
+    <CharacterList csrf={csrfToken} characters={characters} />, document.querySelector("#characters")
+  );
 };
 
 // Function to update character
@@ -93,7 +112,8 @@ const updateGold = () => {
   for (let i = 0; i < characters.length; i++) {
     gold += characters[i].level * characters[i].goldMod;
   }
-  document.querySelector('#goldNum').textContent = `Gold: ${Math.floor(gold)}`;
+  if (gold > goldCap) gold = goldCap;
+  document.querySelector('#goldNum').textContent = `Gold: ${Math.floor(gold)} / ${goldCap}`;
 };
 
 const UpgradeButton = function(props) {
@@ -179,14 +199,17 @@ const addGold = () => {
 const CharacterList = function(props) {
   if(props.characters.length === 0) {
     return(
-      <div className="characterList">
-        <h3 className="emptyCharacter">No Characters Yet</h3>
-        <p className="centered">
-          <a id="createButton" className="waves-effect waves-light btn" onClick={createCharacter}>Create a Character (2000 Gold)</a>
-        </p>
-        <p className="centered">
-          <a id="moneyButton" className="waves-effect waves-light btn grey" onClick={addGold}>Gain 1000 Gold</a>
-        </p>
+      <div>
+        <h4 id='goldNum' className="centered">Gold: 0</h4>
+        <div className="characterList">
+          <h3 className="emptyCharacter">No Characters Yet</h3>
+          <p className="centered">
+            <a id="createButton" className="waves-effect waves-light btn" onClick={createCharacter}>Create a Character (2000 Gold)</a>
+          </p>
+          <p className="centered">
+            <a id="moneyButton" className="waves-effect waves-light btn grey" onClick={addGold}>Gain 1000 Gold</a>
+          </p>
+        </div>
       </div>
     );
   }
@@ -222,21 +245,25 @@ const CharacterList = function(props) {
   if(characterNodes.length < 4) {
     // Display the create a character button if the user has less than 4 characters
     return (
-      <div className="characterList">
-        <h4 className='centered'>Click on one of your characters to open their menus</h4>
-        {characterNodes}
-        <p className="centered">
-          <a id="createButton" className="waves-effect waves-light btn" onClick={createCharacter}>Create a Character (2000 Gold)</a>
-        </p>
-        <p className="centered">
-          <a id="moneyButton" className="waves-effect waves-light btn grey" onClick={addGold}>Gain 1000 Gold</a>
-        </p>
+      <div>
+        <h4 id='goldNum' className="centered">Gold: 0</h4>
+        <div className="characterList">
+          <h4 className='centered'>Click on one of your characters to open their menus</h4>
+          {characterNodes}
+          <p className="centered">
+            <a id="createButton" className="waves-effect waves-light btn" onClick={createCharacter}>Create a Character (2000 Gold)</a>
+          </p>
+          <p className="centered">
+            <a id="moneyButton" className="waves-effect waves-light btn grey" onClick={addGold}>Gain 1000 Gold</a>
+          </p>
+        </div>
       </div>
     );
   } else {
     // Otherwise display a buy character slots button
     return (
       <div>
+        <h4 id='goldNum' className="centered">Gold: 0</h4>
         <div className="characterList">
           <h4 className='centered'>Click on one of your characters to open their menus</h4>
           {characterNodes}
@@ -278,6 +305,7 @@ const setup = function(csrf, passedTime) {
   
   setInterval(saveToDB, 5000);
   setInterval(updateGold, 1000);
+  setInterval(updateXP, 10000);
 };
 
 // Add to our gold based on our production  
@@ -293,6 +321,8 @@ const offlineProduction = (time) => {
   document.querySelector('#goldNum').textContent = `Gold: ${Math.floor(gold)}`;
   
   handleError(`Welcome back! You gained ${addedGold} while offline.`);
+  
+  saveToDB();
 };
 
 const getToken = () => {
@@ -313,6 +343,7 @@ const getToken = () => {
     
     const passedTime = Math.floor((currentTime - accountTime) / 1000);
     
+    goldCap = 2000 + (account.battlesCompleted * 500);
     gold = account.gold;
     setup(result.csrfToken, passedTime);
   });

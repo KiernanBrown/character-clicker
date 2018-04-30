@@ -6,16 +6,17 @@ var csrfToken = '';
 var characters = [];
 var gold = 0;
 var account = {};
+var goldCap = 2000;
 
 // Update all of our characters in the database
 // We call this every 30 seconds as a way of autosaving
 var saveToDB = function saveToDB() {
   console.dir('Saved to the db!');
-  sendAjax('POST', '/saveAccount', 'id=' + account._id + '&gold=' + gold + '&_csrf=' + csrfToken);
+  sendAjax('POST', '/saveAccount', 'id=' + account._id + '&gold=' + gold + '&battlesCompleted=' + account.battlesCompleted + '&_csrf=' + csrfToken);
 
   for (var i = 0; i < characters.length; i++) {
     var character = characters[i];
-    sendAjax('POST', '/saveCharacter', 'id=' + character._id + '&xp=' + character.xp + '&xpNeeded=' + character.xpNeeded + '&level=' + character.level + '&upgrades=' + character.upgrades + '&_csrf=' + csrfToken);
+    sendAjax('POST', '/saveCharacter', 'id=' + character._id + '&xp=' + character.xp + '&xpNeeded=' + character.xpNeeded + '&level=' + character.level + '&attack=' + character.attack + '&defense=' + character.defense + '&upgrades=' + character.upgrades + '&_csrf=' + csrfToken);
   }
 };
 
@@ -42,25 +43,41 @@ var createCharacter = function createCharacter(e) {
   return false;
 };
 
+// Function to check if a character should level up
+var checkLevelUp = function checkLevelUp(chara) {
+  var character = chara;
+  if (character.xp >= character.xpNeeded) {
+    character.xp -= character.xpNeeded;
+    character.level++;
+    character.attack++;
+    character.defense++;
+    character.xpNeeded = Math.floor(Math.pow(character.xpNeeded, 1.09));
+    checkLevelUp(character);
+  }
+};
+
+// Function to give each character xp every 10 seconds
+var updateXP = function updateXP() {
+  for (var i = 0; i < characters.length; i++) {
+    var character = characters[i];
+    character.xp++;
+    if (character.upgrades.includes('Dedicated Trainer')) character.xp++;
+    checkLevelUp(character);
+  }
+
+  updateCharacter();
+  ReactDOM.render(React.createElement(CharacterList, { csrf: csrfToken, characters: characters }), document.querySelector("#characters"));
+
+  saveToDB();
+};
+
 // Function to handle clicking to train a character
 var handleClick = function handleClick() {
   selectedCharacter.xp++;
   if (selectedCharacter.upgrades.includes('Dedicated Trainer')) selectedCharacter.xp++;
-  checkLevelUp();
+  checkLevelUp(selectedCharacter);
   updateCharacter();
   ReactDOM.render(React.createElement(CharacterList, { csrf: csrfToken, characters: characters }), document.querySelector("#characters"));
-};
-
-// Function to check if a character should level up
-var checkLevelUp = function checkLevelUp() {
-  if (selectedCharacter.xp >= selectedCharacter.xpNeeded) {
-    selectedCharacter.xp -= selectedCharacter.xpNeeded;
-    selectedCharacter.level++;
-    selectedCharacter.attack++;
-    selectedCharacter.defense++;
-    selectedCharacter.xpNeeded = Math.floor(Math.pow(selectedCharacter.xpNeeded, 1.12));
-    checkLevelUp();
-  }
 };
 
 // Function to update character
@@ -90,7 +107,8 @@ var updateGold = function updateGold() {
   for (var i = 0; i < characters.length; i++) {
     gold += characters[i].level * characters[i].goldMod;
   }
-  document.querySelector('#goldNum').textContent = 'Gold: ' + Math.floor(gold);
+  if (gold > goldCap) gold = goldCap;
+  document.querySelector('#goldNum').textContent = 'Gold: ' + Math.floor(gold) + ' / ' + goldCap;
 };
 
 var UpgradeButton = function UpgradeButton(props) {
@@ -225,28 +243,37 @@ var CharacterList = function CharacterList(props) {
   if (props.characters.length === 0) {
     return React.createElement(
       'div',
-      { className: 'characterList' },
+      null,
       React.createElement(
-        'h3',
-        { className: 'emptyCharacter' },
-        'No Characters Yet'
+        'h4',
+        { id: 'goldNum', className: 'centered' },
+        'Gold: 0'
       ),
       React.createElement(
-        'p',
-        { className: 'centered' },
+        'div',
+        { className: 'characterList' },
         React.createElement(
-          'a',
-          { id: 'createButton', className: 'waves-effect waves-light btn', onClick: createCharacter },
-          'Create a Character (2000 Gold)'
-        )
-      ),
-      React.createElement(
-        'p',
-        { className: 'centered' },
+          'h3',
+          { className: 'emptyCharacter' },
+          'No Characters Yet'
+        ),
         React.createElement(
-          'a',
-          { id: 'moneyButton', className: 'waves-effect waves-light btn grey', onClick: addGold },
-          'Gain 1000 Gold'
+          'p',
+          { className: 'centered' },
+          React.createElement(
+            'a',
+            { id: 'createButton', className: 'waves-effect waves-light btn', onClick: createCharacter },
+            'Create a Character (2000 Gold)'
+          )
+        ),
+        React.createElement(
+          'p',
+          { className: 'centered' },
+          React.createElement(
+            'a',
+            { id: 'moneyButton', className: 'waves-effect waves-light btn grey', onClick: addGold },
+            'Gain 1000 Gold'
+          )
         )
       )
     );
@@ -320,29 +347,38 @@ var CharacterList = function CharacterList(props) {
     // Display the create a character button if the user has less than 4 characters
     return React.createElement(
       'div',
-      { className: 'characterList' },
+      null,
       React.createElement(
         'h4',
-        { className: 'centered' },
-        'Click on one of your characters to open their menus'
-      ),
-      characterNodes,
-      React.createElement(
-        'p',
-        { className: 'centered' },
-        React.createElement(
-          'a',
-          { id: 'createButton', className: 'waves-effect waves-light btn', onClick: createCharacter },
-          'Create a Character (2000 Gold)'
-        )
+        { id: 'goldNum', className: 'centered' },
+        'Gold: 0'
       ),
       React.createElement(
-        'p',
-        { className: 'centered' },
+        'div',
+        { className: 'characterList' },
         React.createElement(
-          'a',
-          { id: 'moneyButton', className: 'waves-effect waves-light btn grey', onClick: addGold },
-          'Gain 1000 Gold'
+          'h4',
+          { className: 'centered' },
+          'Click on one of your characters to open their menus'
+        ),
+        characterNodes,
+        React.createElement(
+          'p',
+          { className: 'centered' },
+          React.createElement(
+            'a',
+            { id: 'createButton', className: 'waves-effect waves-light btn', onClick: createCharacter },
+            'Create a Character (2000 Gold)'
+          )
+        ),
+        React.createElement(
+          'p',
+          { className: 'centered' },
+          React.createElement(
+            'a',
+            { id: 'moneyButton', className: 'waves-effect waves-light btn grey', onClick: addGold },
+            'Gain 1000 Gold'
+          )
         )
       )
     );
@@ -351,6 +387,11 @@ var CharacterList = function CharacterList(props) {
     return React.createElement(
       'div',
       null,
+      React.createElement(
+        'h4',
+        { id: 'goldNum', className: 'centered' },
+        'Gold: 0'
+      ),
       React.createElement(
         'div',
         { className: 'characterList' },
@@ -405,6 +446,7 @@ var setup = function setup(csrf, passedTime) {
 
   setInterval(saveToDB, 5000);
   setInterval(updateGold, 1000);
+  setInterval(updateXP, 10000);
 };
 
 // Add to our gold based on our production  
@@ -420,6 +462,8 @@ var offlineProduction = function offlineProduction(time) {
   document.querySelector('#goldNum').textContent = 'Gold: ' + Math.floor(gold);
 
   handleError('Welcome back! You gained ' + addedGold + ' while offline.');
+
+  saveToDB();
 };
 
 var getToken = function getToken() {
@@ -440,6 +484,7 @@ var getToken = function getToken() {
 
     var passedTime = Math.floor((currentTime - accountTime) / 1000);
 
+    goldCap = 2000 + account.battlesCompleted * 500;
     gold = account.gold;
     setup(result.csrfToken, passedTime);
   });

@@ -17,6 +17,7 @@ const router = (app) => {
   app.post('/deleteCharacter', mid.requiresLogin, controllers.Character.delete);
   app.post('/saveCharacter', mid.requiresLogin, controllers.Character.save);
   app.post('/saveAccount', mid.requiresLogin, controllers.Account.save);
+  app.get('/battle', mid.requiresLogin, controllers.Account.battlePage);
   app.get('/', mid.requiresSecure, mid.requiresLogout, controllers.Account.loginPage);
   app.get('/*', mid.requiresLogin, controllers.Character.makerPage);
 };

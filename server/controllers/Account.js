@@ -14,6 +14,10 @@ const storePage = (req, res) => {
   res.render('store', { csrfToken: req.csrfToken(), account: req.session.account });
 };
 
+const battlePage = (req, res) => {
+  res.render('battle', { csrfToken: req.csrfToken(), account: req.session.account });
+};
+
 const logout = (req, res) => {
   req.session.destroy();
   res.redirect('/');
@@ -65,6 +69,8 @@ const signup = (request, response) => {
       salt,
       password: hash,
       gold: 2000,
+      goldCap: 2000,
+      battlesCompleted: 0,
     };
 
     const newAccount = new Account.AccountModel(accountData);
@@ -91,9 +97,6 @@ const signup = (request, response) => {
 const changePassword = (request, response) => {
   const req = request;
   const res = response;
-  console.dir('CHANGING');
-
-  console.dir(req.session);
 
   // Cast to strings to cover up some security flaws
   req.body.pass = `${req.body.pass}`;
@@ -117,14 +120,10 @@ const changePassword = (request, response) => {
 
     return Account.AccountModel.findOne({ username }, (error, doc) => {
       const acc = doc;
-      console.dir(acc);
 
       Account.AccountModel.generateHash(req.body.newPass, (salt, hash) => {
         acc.password = hash;
         acc.salt = salt;
-
-        console.dir('New Acc');
-        console.dir(acc);
 
         const savePromise = new Account.AccountModel(acc).save();
 
@@ -144,6 +143,7 @@ const saveAccount = (request, res) => {
   Account.AccountModel.findOne({ _id: id }, (err, doc) => {
     const account = doc;
     account.gold = req.body.gold;
+    account.battlesCompleted = req.body.battlesCompleted;
     account.lastUpdate = Date.now();
     const savePromise = new Account.AccountModel(account).save();
     savePromise.then(() => {
@@ -174,3 +174,4 @@ module.exports.profilePage = profilePage;
 module.exports.storePage = storePage;
 module.exports.changePassword = changePassword;
 module.exports.save = saveAccount;
+module.exports.battlePage = battlePage;
