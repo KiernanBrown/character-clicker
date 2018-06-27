@@ -5,6 +5,7 @@ let characters = [];
 let gold = 0;
 let account = {};
 let goldCap = 2000;
+let charCost = 2000;
 
 // Update all of our characters in the database
 // We call this every 30 seconds as a way of autosaving
@@ -28,13 +29,13 @@ const createCharacter = (e) => {
   
   saveToDB();
   
-  if (gold < 2000) {
+  if (gold < charCost) {
     handleError("You don't have enough gold!");
     return false;
   }
   
   sendAjax('POST', '/maker', `_csrf=${csrfToken}`, function() {
-    gold -= 2000;
+    gold -= charCost;
     loadCharactersFromServer();
   });
   
@@ -114,6 +115,7 @@ const updateGold = () => {
   }
   if (gold > goldCap) gold = goldCap;
   document.querySelector('#goldNum').textContent = `Gold: ${Math.floor(gold)} / ${goldCap}`;
+  charCost = 2000 + (characters.length - 1) * 1500;
 };
 
 const UpgradeButton = function(props) {
@@ -204,10 +206,7 @@ const CharacterList = function(props) {
         <div className="characterList">
           <h3 className="emptyCharacter">No Characters Yet</h3>
           <p className="centered">
-            <a id="createButton" className="waves-effect waves-light btn" onClick={createCharacter}>Create a Character (2000 Gold)</a>
-          </p>
-          <p className="centered">
-            <a id="moneyButton" className="waves-effect waves-light btn grey" onClick={addGold}>Gain 1000 Gold</a>
+            <a id="createButton" className="waves-effect waves-light btn" onClick={createCharacter}>Create a Character ({charCost} Gold)</a>
           </p>
         </div>
       </div>
@@ -242,8 +241,8 @@ const CharacterList = function(props) {
     ); 
   });
   
-  if(characterNodes.length < 4) {
-    // Display the create a character button if the user has less than 4 characters
+  if(characterNodes.length < 8) {
+    // Display the create a character button if the user has less than 8 characters
     return (
       <div>
         <h4 id='goldNum' className="centered">Gold: 0</h4>
@@ -251,10 +250,7 @@ const CharacterList = function(props) {
           <h4 className='centered'>Click on one of your characters to open their menus</h4>
           {characterNodes}
           <p className="centered">
-            <a id="createButton" className="waves-effect waves-light btn" onClick={createCharacter}>Create a Character (2000 Gold)</a>
-          </p>
-          <p className="centered">
-            <a id="moneyButton" className="waves-effect waves-light btn grey" onClick={addGold}>Gain 1000 Gold</a>
+            <a id="createButton" className="waves-effect waves-light btn" onClick={createCharacter}>Create a Character ({charCost} Gold)</a>
           </p>
         </div>
       </div>
@@ -268,12 +264,6 @@ const CharacterList = function(props) {
           <h4 className='centered'>Click on one of your characters to open their menus</h4>
           {characterNodes}
         </div>
-        <p className="centered">
-          <a href="/store" className="waves-effect waves-light btn centered purple darken-3 centered">Buy An Additional Character Slot (20 Gems)</a>
-        </p>
-        <p className="centered">
-          <a id="moneyButton" className="waves-effect waves-light btn grey" onClick={addGold}>Gain 1000 Gold</a>
-        </p>
       </div>
     );
   }
@@ -287,6 +277,7 @@ const loadCharactersFromServer = (csrf, passedTime) => {
       <CharacterList csrf={csrf} characters={data.characters} />, document.querySelector("#characters")
     );
     updateGoldMods();
+    charCost = 2000 + (characters.length - 1) * 1500;
     
     if (passedTime >= 60) {
       offlineProduction(passedTime);

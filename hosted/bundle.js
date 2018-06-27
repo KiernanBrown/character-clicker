@@ -7,6 +7,7 @@ var characters = [];
 var gold = 0;
 var account = {};
 var goldCap = 2000;
+var charCost = 2000;
 
 // Update all of our characters in the database
 // We call this every 30 seconds as a way of autosaving
@@ -30,13 +31,13 @@ var createCharacter = function createCharacter(e) {
 
   saveToDB();
 
-  if (gold < 2000) {
+  if (gold < charCost) {
     handleError("You don't have enough gold!");
     return false;
   }
 
   sendAjax('POST', '/maker', '_csrf=' + csrfToken, function () {
-    gold -= 2000;
+    gold -= charCost;
     loadCharactersFromServer();
   });
 
@@ -109,6 +110,7 @@ var updateGold = function updateGold() {
   }
   if (gold > goldCap) gold = goldCap;
   document.querySelector('#goldNum').textContent = 'Gold: ' + Math.floor(gold) + ' / ' + goldCap;
+  charCost = 2000 + (characters.length - 1) * 1500;
 };
 
 var UpgradeButton = function UpgradeButton(props) {
@@ -263,16 +265,9 @@ var CharacterList = function CharacterList(props) {
           React.createElement(
             'a',
             { id: 'createButton', className: 'waves-effect waves-light btn', onClick: createCharacter },
-            'Create a Character (2000 Gold)'
-          )
-        ),
-        React.createElement(
-          'p',
-          { className: 'centered' },
-          React.createElement(
-            'a',
-            { id: 'moneyButton', className: 'waves-effect waves-light btn grey', onClick: addGold },
-            'Gain 1000 Gold'
+            'Create a Character (',
+            charCost,
+            ' Gold)'
           )
         )
       )
@@ -343,8 +338,8 @@ var CharacterList = function CharacterList(props) {
     );
   });
 
-  if (characterNodes.length < 4) {
-    // Display the create a character button if the user has less than 4 characters
+  if (characterNodes.length < 8) {
+    // Display the create a character button if the user has less than 8 characters
     return React.createElement(
       'div',
       null,
@@ -368,16 +363,9 @@ var CharacterList = function CharacterList(props) {
           React.createElement(
             'a',
             { id: 'createButton', className: 'waves-effect waves-light btn', onClick: createCharacter },
-            'Create a Character (2000 Gold)'
-          )
-        ),
-        React.createElement(
-          'p',
-          { className: 'centered' },
-          React.createElement(
-            'a',
-            { id: 'moneyButton', className: 'waves-effect waves-light btn grey', onClick: addGold },
-            'Gain 1000 Gold'
+            'Create a Character (',
+            charCost,
+            ' Gold)'
           )
         )
       )
@@ -401,24 +389,6 @@ var CharacterList = function CharacterList(props) {
           'Click on one of your characters to open their menus'
         ),
         characterNodes
-      ),
-      React.createElement(
-        'p',
-        { className: 'centered' },
-        React.createElement(
-          'a',
-          { href: '/store', className: 'waves-effect waves-light btn centered purple darken-3 centered' },
-          'Buy An Additional Character Slot (20 Gems)'
-        )
-      ),
-      React.createElement(
-        'p',
-        { className: 'centered' },
-        React.createElement(
-          'a',
-          { id: 'moneyButton', className: 'waves-effect waves-light btn grey', onClick: addGold },
-          'Gain 1000 Gold'
-        )
       )
     );
   }
@@ -430,6 +400,7 @@ var loadCharactersFromServer = function loadCharactersFromServer(csrf, passedTim
     characters = data.characters;
     ReactDOM.render(React.createElement(CharacterList, { csrf: csrf, characters: data.characters }), document.querySelector("#characters"));
     updateGoldMods();
+    charCost = 2000 + (characters.length - 1) * 1500;
 
     if (passedTime >= 60) {
       offlineProduction(passedTime);

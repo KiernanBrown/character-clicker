@@ -149,12 +149,12 @@ nav:nth-child(1) {
 
 #characterMessage {
   display: none;
-  position: absolute;
+  position: fixed;
   z-index: 200;
   left: 0;
   right: 0;
   margin: auto;
-  top: 800px;
+  bottom: 20px;
   width: 500px;
   text-align: center;
   border: 2px solid #444444;
